@@ -78,7 +78,7 @@ public class LoginFragment extends Fragment {
                 String username = usernameView.getText().toString();
                 String password = passwordView.getText().toString();
 
-                Log.d(DEBUG, serverHostname + ":" + username + ":" + password);
+
 
                 attemptLogin(serverHostname, username, password);
             }
@@ -93,7 +93,7 @@ public class LoginFragment extends Fragment {
         mProgress = ProgressDialog.show(getActivity(), "Contacting Server",
                 "Attempting login...");
 
-        new LoginTask().execute();
+        new LoginTask().execute(host, username, password);
 
     }
 
@@ -121,11 +121,17 @@ public class LoginFragment extends Fragment {
     }
 
 
-    private class LoginTask extends AsyncTask<Void, Void, Boolean> {
+    private class LoginTask extends AsyncTask<String, Void, Boolean> {
 
 
         @Override
-        protected Boolean doInBackground(Void... params) {
+        protected Boolean doInBackground(String... params) {
+
+            String serverHostname = params[0];
+            String username = params[1];
+            String password = params[2];
+
+            Log.d(DEBUG, serverHostname + ":" + username + ":" + password);
 
             try {
                 Thread.sleep(2000); // DEBUG
