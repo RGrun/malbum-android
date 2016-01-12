@@ -102,6 +102,7 @@ public class ServerConnect {
 
         } else {
 
+            // TODO: make this throw an exception instead?
             return null;
 
         }
