@@ -42,6 +42,9 @@ public class ServerConnect {
 
     private URL endpoint;
 
+
+    // if this constructor is used, we assume this object will be used for
+    // logging in to the server.
     public ServerConnect(String hostname, String username, String password) {
 
         this.hostname = hostname;
@@ -50,6 +53,18 @@ public class ServerConnect {
 
     }
 
+    // this constructor is for more general queries.
+    public ServerConnect(String hostname, String key) {
+        this.hostname = hostname;
+        this.apiKey = key;
+    }
+
+
+
+
+    /*
+     *   LOGIN METHODS
+     */
 
     // returns null object upon failed connection
     public MalbumUser attemptLogin()
@@ -95,6 +110,7 @@ public class ServerConnect {
             }
 
             out.close();
+            conn.disconnect();
 
             String jsonString = new String(out.toByteArray());
 
@@ -127,6 +143,21 @@ public class ServerConnect {
         }
 
     }
+
+    /*
+     *   GET LATEST ALBUMS METHODS
+     */
+
+    public List<UserAlbum> fetchAlbums() {
+        // TODO: need to set up downloading of this server-side
+
+        return null; // DEBUG
+    }
+
+
+    /*
+     *   MISC METHODS
+     */
 
     // grabs raw bytes from the specified URL
     public byte[] getUrlBytes(String urlSpec) throws IOException {

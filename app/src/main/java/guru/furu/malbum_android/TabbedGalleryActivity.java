@@ -1,18 +1,19 @@
 package guru.furu.malbum_android;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import java.util.UUID;
+import java.util.Map;
 
 /**
  * Created by richard on 1/10/16.
@@ -25,6 +26,7 @@ import java.util.UUID;
 public class TabbedGalleryActivity extends AppCompatActivity {
 
     private ViewPager viewPager;
+    private MalbumUser malbumUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +37,8 @@ public class TabbedGalleryActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
-        tabLayout.addTab(tabLayout.newTab().setText("Gallery"));
+        tabLayout.addTab(tabLayout.newTab().setText("Latest"));
+        tabLayout.addTab(tabLayout.newTab().setText("Albums"));
         tabLayout.addTab(tabLayout.newTab().setText("Upload"));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
@@ -49,9 +52,12 @@ public class TabbedGalleryActivity extends AppCompatActivity {
 
                 switch(position) {
                     case 0:
-                        return GalleryFragment.newInstance();
+                        return LatestFragment.newInstance();
 
                     case 1:
+                        return AlbumFragment.newInstance();
+
+                    case 2:
                         return UploadFragment.newInstance();
 
                 }
@@ -84,6 +90,30 @@ public class TabbedGalleryActivity extends AppCompatActivity {
 
             }
         });
+
+        this.malbumUser = rebuildUser();
+
+    }
+
+    private MalbumUser rebuildUser() {
+
+        Map<String, ?> userMap = getSharedPreferences(LoginFragment.PREF_FILE_NAME,
+                Context.MODE_PRIVATE).getAll();
+
+        String uname = (String) userMap.get("uname");
+        String uname_lower = (String) userMap.get("uname_lower");
+        String fname = (String) userMap.get("fname");
+        String lname = (String) userMap.get("lname");
+        String api_key = (String) userMap.get("api_key");
+        String user_id = (String) userMap.get("user_id");
+        String hostname = (String) userMap.get("hostname");
+
+        return new MalbumUser(uname, user_id, uname_lower, fname, lname, api_key, hostname);
+
+    }
+
+    public MalbumUser getMalbumUser() {
+        return malbumUser;
     }
 
     @Override
