@@ -1,13 +1,17 @@
 package guru.furu.malbum_android;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,14 +29,60 @@ public class AlbumFragment extends Fragment {
 
     private RecyclerView recyclerView;
     
-    private List<UserAlbum> albums = new ArrayList<>();
+    private List<UserAlbum> albums;
 
     private MalbumUser malbumUser;
 
-    // TODO: add handler stuff
-
+    private ThumbnailDownloader<AlbumHolder> thumbnailDownloader;
+    
+    private static final String DEBUG = "AlbumFragment";
+    
     public static AlbumFragment newInstance() {
         return new AlbumFragment();
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+        setHasOptionsMenu(true);
+
+        this.malbumUser = ((TabbedGalleryActivity)getActivity()).getMalbumUser();
+
+
+        // this Handler belongs to the UI Thread's Looper
+        // because it's created in the UI Thread.
+        Handler responseHandler = new Handler();
+        thumbnailDownloader = new ThumbnailDownloader<>(responseHandler);
+
+        thumbnailDownloader.setThumbnailDownloadListener(
+
+                new ThumbnailDownloader.ThumbnailDownloadListener<AlbumHolder>() {
+                    @Override
+                    public void onThumbnailDownloaded(AlbumHolder photoHolder, Bitmap bitmap) {
+                        Drawable drawable = new BitmapDrawable(getResources(), bitmap);
+                        photoHolder.bindDrawable(drawable);
+                    }
+                });
+
+        thumbnailDownloader.start();
+        thumbnailDownloader.getLooper();
+        Log.i(DEBUG, "Background thread started.");
+        albums = new ArrayList<>();
+        updateItems();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        thumbnailDownloader.quit();
+        Log.i(DEBUG, "Background thread destroyed.");
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        thumbnailDownloader.clearQueue();
     }
 
     @Override
@@ -46,8 +96,6 @@ public class AlbumFragment extends Fragment {
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(3,
                 StaggeredGridLayoutManager.VERTICAL));
 
-
-        this.malbumUser = ((TabbedGalleryActivity)getActivity()).getMalbumUser();
 
         setupAdapter();
 
@@ -70,8 +118,14 @@ public class AlbumFragment extends Fragment {
         @Override
         protected List<UserAlbum> doInBackground(Void... params) {
 
-            return new ServerConnect(malbumUser.getHostname(), malbumUser.getApi_key())
-                    .fetchAlbums();
+            try {
+                return new ServerConnect(malbumUser.getHostname(), malbumUser.getApi_key())
+                        .fetchAlbums();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return new ArrayList<>();
         }
 
         @Override
@@ -93,6 +147,7 @@ public class AlbumFragment extends Fragment {
             userAlbum = UserAlbum;
         }
 
+        // TODO: hook up user name in grid view
 
         @Override
         public void onClick(View v) {
@@ -147,7 +202,7 @@ public class AlbumFragment extends Fragment {
 
             // make background thread download image thumbnail
             // the reference to the current item is passed on to the downloader
-            mThumbailDownloader.queueThumbnail(AlbumHolder, UserAlbum.getAlbumImageUrl());
+            thumbnailDownloader.queueThumbnail(AlbumHolder, UserAlbum.getAlbumImageUrl());
 
         }
 
@@ -156,5 +211,10 @@ public class AlbumFragment extends Fragment {
             return userAlbums.size();
         }
     }
+
+    private void updateItems() {
+        new FetchAlbumsTask().execute();
+    }
+
 
 }

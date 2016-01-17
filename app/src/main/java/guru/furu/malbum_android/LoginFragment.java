@@ -102,14 +102,14 @@ public class LoginFragment extends Fragment {
                     getActivity().getSharedPreferences(PREF_FILE_NAME,
                             Context.MODE_PRIVATE).edit();
 
-            /*editor.putString("hostname", user.getHostname());
+            editor.putString("hostname", user.getHostname());
             editor.putString("uname", user.getUname());
             editor.putString("uname_lower", user.getUname_lower());
             editor.putString("fname", user.getFname());
             editor.putString("lname", user.getLname());
             editor.putString("api_key", user.getApi_key());
             editor.putString("user_id", user.getUser_id());
-            editor.commit();*/
+            editor.commit();
 
             Toast.makeText(getActivity(),
                     "Login Success!",

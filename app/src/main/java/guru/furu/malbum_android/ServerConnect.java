@@ -1,6 +1,7 @@
 package guru.furu.malbum_android;
 
 import android.net.Uri;
+import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -18,6 +19,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,7 @@ public class ServerConnect {
     // These are for the POST form parameters
     private static final String USERNAME = "uname";
     private static final String PASSWORD = "pwd";
+    private static final String API_KEY = "key";
 
     private String hostname;
     private String username;
@@ -59,7 +62,8 @@ public class ServerConnect {
         this.apiKey = key;
     }
 
-
+    // this constructor is for using getUrlBytes()
+    public ServerConnect() {}
 
 
     /*
@@ -148,10 +152,108 @@ public class ServerConnect {
      *   GET LATEST ALBUMS METHODS
      */
 
-    public List<UserAlbum> fetchAlbums() {
-        // TODO: need to set up downloading of this server-side
 
-        return null; // DEBUG
+
+    private List<UserAlbum> parseAlbums(String jsonString) {
+
+        List<UserAlbum> albums = new ArrayList<>();
+
+        Log.d(DEBUG, jsonString);
+
+        try {
+            JSONObject json = new JSONObject(jsonString);
+
+            String status = json.getString("status");
+
+            if(status.equals("ok")) {
+                JSONArray thumbs = json.getJSONArray("thumbs");
+
+                for(int i = 0; i < thumbs.length(); i++) {
+                    JSONObject thumb = thumbs.getJSONObject(i);
+
+                    String uname = thumb.getString("uname");
+                    String thumbName = thumb.getString("thumb_name");
+
+                    String thumbPath = "http://" + hostname + "/img/" + uname + "/" + thumbName;
+
+                    UserAlbum album = new UserAlbum(uname, thumbPath);
+
+                    albums.add(album);
+
+                }
+
+
+                return albums;
+
+            } else {
+
+                //TODO: throw exception instead?
+                return null;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        //TODO: throw exception instead?
+        return null;
+    }
+
+    public List<UserAlbum> fetchAlbums()
+            throws JSONException, IOException{
+
+
+        endpoint = new URL("http://" + hostname + "/api/albums");
+
+        HashMap<String, String> postParams = new HashMap<>();
+
+        postParams.put(API_KEY, apiKey);
+
+        HttpURLConnection conn = (HttpURLConnection) endpoint.openConnection();
+        conn.setReadTimeout(15000);
+        conn.setConnectTimeout(15000);
+        conn.setRequestMethod("POST");
+        conn.setDoInput(true);
+        conn.setDoOutput(true);
+
+
+        OutputStream os = conn.getOutputStream();
+        BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(os, "UTF-8"));
+        writer.write(getPostDataString(postParams));
+
+        writer.flush();
+        writer.close();
+        os.close();
+
+        int responseCode = conn.getResponseCode();
+
+        if (responseCode == HttpsURLConnection.HTTP_OK) {
+
+            InputStream in = conn.getInputStream();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+            int bytesRead = 0;
+            byte [] buffer = new byte[1024];
+
+            while((bytesRead = in.read(buffer)) > 0) {
+                out.write(buffer, 0, bytesRead);
+            }
+
+            out.close();
+            conn.disconnect();
+
+            String jsonString = new String(out.toByteArray());
+
+            return parseAlbums(jsonString);
+
+        } else {
+
+            // TODO: make this throw an exception instead?
+            return null;
+
+        }
+
     }
 
 
@@ -162,6 +264,8 @@ public class ServerConnect {
     // grabs raw bytes from the specified URL
     public byte[] getUrlBytes(String urlSpec) throws IOException {
         URL url = new URL(urlSpec);
+
+        Log.d(DEBUG, "Connecting to: " + url);
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
