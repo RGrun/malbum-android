@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 
 /**
  * Created by richard on 1/12/16.
+ *
+ * "Latest images" view.
  */
 public class LatestFragment extends Fragment {
 
@@ -21,7 +23,7 @@ public class LatestFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View v =  inflater.inflate(R.layout.album_fragment, container, false);
+        View v =  inflater.inflate(R.layout.latest_fragment, container, false);
 
         return v;
     }

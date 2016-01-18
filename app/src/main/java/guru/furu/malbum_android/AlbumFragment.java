@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +35,9 @@ public class AlbumFragment extends Fragment {
     private MalbumUser malbumUser;
 
     private ThumbnailDownloader<AlbumHolder> thumbnailDownloader;
-    
+
     private static final String DEBUG = "AlbumFragment";
-    
+
     public static AlbumFragment newInstance() {
         return new AlbumFragment();
     }
@@ -140,19 +141,18 @@ public class AlbumFragment extends Fragment {
             implements View.OnClickListener {
 
 
-        private ImageView mItemImageView;
+        private ImageView itemImageView;
+        private TextView itemTextView;
         private UserAlbum userAlbum;
 
         public void bindUserAlbum(UserAlbum UserAlbum) {
             userAlbum = UserAlbum;
         }
 
-        // TODO: hook up user name in grid view
-
         @Override
         public void onClick(View v) {
-          /*  Intent i = PhotoPageActivity.newIntent(getActivity(), userAlbum.getPhotoPageUri());
-            startActivity(i);*/
+            Intent i = PhotoPageActivity.newIntent(getActivity(), userAlbum.getPhotoPageUri());
+            startActivity(i);
         }
 
 
@@ -160,12 +160,18 @@ public class AlbumFragment extends Fragment {
         public AlbumHolder(View itemView) {
             super(itemView);
 
-            mItemImageView = (ImageView) itemView.findViewById(R.id.fragment_photo_album_image_view);
+            itemImageView = (ImageView) itemView.findViewById(R.id.fragment_photo_album_image_view);
+            itemTextView = (TextView) itemView.findViewById(R.id.album_name);
+
             itemView.setOnClickListener(this);
         }
 
         public void bindDrawable(Drawable drawable) {
-            mItemImageView.setImageDrawable(drawable);
+            itemImageView.setImageDrawable(drawable);
+        }
+
+        public void setText(String newText) {
+            itemTextView.setText(newText);
         }
     }
 
@@ -173,8 +179,8 @@ public class AlbumFragment extends Fragment {
 
         private List<UserAlbum> userAlbums;
 
-        public AlbumAdapter(List<UserAlbum> UserAlbums) {
-            userAlbums = UserAlbums;
+        public AlbumAdapter(List<UserAlbum> userAlbums) {
+            this.userAlbums = userAlbums;
         }
 
         @Override
@@ -199,6 +205,7 @@ public class AlbumFragment extends Fragment {
             AlbumHolder.bindUserAlbum(UserAlbum);
 
             AlbumHolder.bindDrawable(placeholder);
+            AlbumHolder.setText(UserAlbum.getUserName());
 
             // make background thread download image thumbnail
             // the reference to the current item is passed on to the downloader
