@@ -1,7 +1,6 @@
 package guru.furu.malbum_android;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -14,6 +13,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import java.util.Map;
+
+import guru.furu.malbum_android.model.MalbumUser;
 
 /**
  * Created by richard on 1/10/16.
@@ -33,7 +34,8 @@ public class TabbedGalleryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tabbed_pager);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Latest Images");
         setSupportActionBar(toolbar);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tab_layout);
@@ -69,7 +71,7 @@ public class TabbedGalleryActivity extends AppCompatActivity {
 
             @Override
             public int getCount() {
-                return 2;
+                return 3;
             }
         });
 
@@ -78,6 +80,22 @@ public class TabbedGalleryActivity extends AppCompatActivity {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 viewPager.setCurrentItem(tab.getPosition());
+                int pos = tab.getPosition();
+
+                switch (pos) {
+                    case 0:
+                        toolbar.setTitle("Latest Images");
+                        setSupportActionBar(toolbar);
+                        break;
+                    case 1:
+                        toolbar.setTitle("Recent Images By User");
+                        setSupportActionBar(toolbar);
+                        break;
+                    case 2:
+                        toolbar.setTitle("Upload New Image");
+                        setSupportActionBar(toolbar);
+                        break;
+                }
             }
 
             @Override

@@ -1,18 +1,15 @@
 package guru.furu.malbum_android;
 
-import android.net.Uri;
 import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -25,6 +22,10 @@ import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
+
+import guru.furu.malbum_android.model.AlbumPhoto;
+import guru.furu.malbum_android.model.MalbumUser;
+import guru.furu.malbum_android.model.UserAlbum;
 
 /**
  * This class connects to the server specified in the login activity.
@@ -152,8 +153,6 @@ public class ServerConnect {
      *   GET LATEST ALBUMS METHODS
      */
 
-
-
     private List<UserAlbum> parseAlbums(String jsonString) {
 
         List<UserAlbum> albums = new ArrayList<>();
@@ -255,6 +254,110 @@ public class ServerConnect {
         }
 
     }
+
+    /*
+     *   SINGLE USER ALBUM METHODS
+     *
+     */
+
+    public List<AlbumPhoto> getPhotosForUser(String username)
+            throws JSONException, IOException {
+
+        endpoint = new URL("http://" + hostname + "/api/photos-for-user/" + username);
+
+        HashMap<String, String> postParams = new HashMap<>();
+
+        postParams.put(API_KEY, apiKey);
+
+        HttpURLConnection conn = (HttpURLConnection) endpoint.openConnection();
+        conn.setReadTimeout(15000);
+        conn.setConnectTimeout(15000);
+        conn.setRequestMethod("POST");
+        conn.setDoInput(true);
+        conn.setDoOutput(true);
+
+
+        OutputStream os = conn.getOutputStream();
+        BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(os, "UTF-8"));
+        writer.write(getPostDataString(postParams));
+
+        writer.flush();
+        writer.close();
+        os.close();
+
+        int responseCode = conn.getResponseCode();
+
+        if (responseCode == HttpsURLConnection.HTTP_OK) {
+
+            InputStream in = conn.getInputStream();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+            int bytesRead = 0;
+            byte [] buffer = new byte[1024];
+
+            while((bytesRead = in.read(buffer)) > 0) {
+                out.write(buffer, 0, bytesRead);
+            }
+
+            out.close();
+            conn.disconnect();
+
+            String jsonString = new String(out.toByteArray());
+
+            return parseAlbumPhotos(jsonString);
+
+        } else {
+
+            // TODO: make this throw an exception instead?
+            return null;
+
+        }
+
+    }
+
+    private List<AlbumPhoto> parseAlbumPhotos(String jsonString) {
+
+        List<AlbumPhoto> albums = new ArrayList<>();
+
+        Log.d(DEBUG, jsonString);
+
+        try {
+            JSONObject json = new JSONObject(jsonString);
+
+            String status = json.getString("status");
+
+            if(status.equals("ok")) {
+                JSONArray photos = json.getJSONArray("photos");
+
+                for(int i = 0; i < photos.length(); i++) {
+                    JSONObject photo = photos.getJSONObject(i);
+
+
+                    AlbumPhoto album = new AlbumPhoto(hostname, photo);
+
+                    albums.add(album);
+
+                }
+
+
+                return albums;
+
+            } else {
+
+                //TODO: throw exception instead?
+                return null;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        //TODO: throw exception instead?
+        return null;
+    }
+
+
 
 
     /*

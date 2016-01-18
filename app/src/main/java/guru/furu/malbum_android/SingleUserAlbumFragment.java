@@ -20,24 +20,30 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import guru.furu.malbum_android.model.AlbumPhoto;
 import guru.furu.malbum_android.model.MalbumUser;
 import guru.furu.malbum_android.model.UserAlbum;
 
 /**
- * Created by richard on 1/10/16.
+ * Created by richard on 1/18/16.
  *
- * The "Latest Images" from every user in the system.
+ * Displays photos for a single user album.
  */
-public class AlbumFragment extends Fragment {
+public class SingleUserAlbumFragment extends Fragment {
 
     private RecyclerView recyclerView;
-    private List<UserAlbum> albums;
+    private List<AlbumPhoto> photosForUser;
     private MalbumUser malbumUser;
-    private ThumbnailDownloader<AlbumHolder> thumbnailDownloader;
-    private static final String DEBUG = "AlbumFragment";
+    private ThumbnailDownloader<AlbumPhotoHolder> thumbnailDownloader;
 
-    public static AlbumFragment newInstance() {
-        return new AlbumFragment();
+    private String userOfAlbumToDisplay;
+
+    private static final String DEBUG = "SingleUserAlbumFragment";
+
+
+
+    public static SingleUserAlbumFragment newInstance() {
+        return new SingleUserAlbumFragment();
     }
 
     @Override
@@ -46,7 +52,9 @@ public class AlbumFragment extends Fragment {
         setRetainInstance(true);
         setHasOptionsMenu(true);
 
-        this.malbumUser = ((TabbedGalleryActivity)getActivity()).getMalbumUser();
+        this.malbumUser = ((SingleUserAlbumActivity)getActivity()).getMalbumUser();
+
+        this.userOfAlbumToDisplay = getActivity().getIntent().getStringExtra("uname");
 
 
         // this Handler belongs to the UI Thread's Looper
@@ -56,9 +64,9 @@ public class AlbumFragment extends Fragment {
 
         thumbnailDownloader.setThumbnailDownloadListener(
 
-                new ThumbnailDownloader.ThumbnailDownloadListener<AlbumHolder>() {
+                new ThumbnailDownloader.ThumbnailDownloadListener<AlbumPhotoHolder>() {
                     @Override
-                    public void onThumbnailDownloaded(AlbumHolder photoHolder, Bitmap bitmap) {
+                    public void onThumbnailDownloaded(AlbumPhotoHolder photoHolder, Bitmap bitmap) {
                         Drawable drawable = new BitmapDrawable(getResources(), bitmap);
                         photoHolder.bindDrawable(drawable);
                     }
@@ -67,16 +75,16 @@ public class AlbumFragment extends Fragment {
         thumbnailDownloader.start();
         thumbnailDownloader.getLooper();
         Log.i(DEBUG, "Background thread started.");
-        albums = new ArrayList<>();
+        photosForUser = new ArrayList<>();
         updateItems();
     }
 
-    @Override
+    /*@Override
     public void onDestroy() {
         super.onDestroy();
         thumbnailDownloader.quit();
         Log.i(DEBUG, "Background thread destroyed.");
-    }
+    }*/
 
     @Override
     public void onDestroyView() {
@@ -84,7 +92,7 @@ public class AlbumFragment extends Fragment {
         thumbnailDownloader.clearQueue();
     }
 
-    /*@Override
+   /* @Override
     public void onStop() {
         super.onStop();
         thumbnailDownloader.clearQueue();
@@ -94,11 +102,11 @@ public class AlbumFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                            Bundle savedInstanceState) {
-        View v =  inflater.inflate(R.layout.album_fragment, container, false);
+                             Bundle savedInstanceState) {
+        View v =  inflater.inflate(R.layout.single_user_album_fragment, container, false);
 
         recyclerView = (RecyclerView)
-                v.findViewById(R.id.fragment_photo_album_recycler_view);
+                v.findViewById(R.id.fragment_single_user_album_recycler_view);
 
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(3,
                 StaggeredGridLayoutManager.VERTICAL));
@@ -114,20 +122,21 @@ public class AlbumFragment extends Fragment {
 
         // isAdded() checks to see if the fragment is hosted inside an activity
         if(isAdded()) {
-            recyclerView.setAdapter(new AlbumAdapter(albums));
+            recyclerView.setAdapter(new AlbumAdapter(photosForUser));
         }
     }
 
-    private class FetchAlbumsTask extends AsyncTask<Void, Void, List<UserAlbum>> {
+    private class FetchAlbumsTask extends AsyncTask<Void, Void,
+            List<AlbumPhoto>> {
 
         public FetchAlbumsTask() {}
 
         @Override
-        protected List<UserAlbum> doInBackground(Void... params) {
+        protected List<AlbumPhoto> doInBackground(Void... params) {
 
             try {
                 return new ServerConnect(malbumUser.getHostname(), malbumUser.getApi_key())
-                        .fetchAlbums();
+                        .getPhotosForUser(userOfAlbumToDisplay);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -136,34 +145,34 @@ public class AlbumFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(List<UserAlbum> items) {
-            albums = items;
+        protected void onPostExecute(List<AlbumPhoto> items) {
+            photosForUser = items;
             setupAdapter();
         }
     }
 
     // holder and adapter are for the RecyclerView internals
-    private class AlbumHolder extends RecyclerView.ViewHolder
+    private class AlbumPhotoHolder extends RecyclerView.ViewHolder
             implements View.OnClickListener {
 
 
         private ImageView itemImageView;
         private TextView itemTextView;
-        private UserAlbum userAlbum;
+        private AlbumPhoto userPhoto;
 
-        public void bindUserAlbum(UserAlbum UserAlbum) {
-            userAlbum = UserAlbum;
+        public void bindUserPhoto(AlbumPhoto albumPhoto) {
+            userPhoto = albumPhoto;
         }
 
         @Override
         public void onClick(View v) {
-            Intent i = SingleUserAlbumActivity.newIntent(getActivity(), userAlbum.getUserName());
-            startActivity(i);
+            /*Intent i = PhotoPageActivity.newIntent(getActivity(), userAlbum.getPhotoPageUri());
+            startActivity(i);*/
         }
 
 
 
-        public AlbumHolder(View itemView) {
+        public AlbumPhotoHolder(View itemView) {
             super(itemView);
 
             itemImageView = (ImageView) itemView.findViewById(R.id.fragment_photo_album_image_view);
@@ -181,53 +190,61 @@ public class AlbumFragment extends Fragment {
         }
     }
 
-    private class AlbumAdapter extends RecyclerView.Adapter<AlbumHolder> {
+    private class AlbumAdapter extends RecyclerView.Adapter<AlbumPhotoHolder> {
 
-        private List<UserAlbum> userAlbums;
+        private List<AlbumPhoto> userPhotos;
 
-        public AlbumAdapter(List<UserAlbum> userAlbums) {
-            this.userAlbums = userAlbums;
+        public AlbumAdapter(List<AlbumPhoto> userAlbums) {
+            this.userPhotos = userAlbums;
         }
 
         @Override
-        public AlbumHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+        public AlbumPhotoHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(getActivity());
 
 
             // inflate proper layout and pass to holder's constructor
             View view = inflater.inflate(R.layout.album_item, viewGroup, false);
 
-            return new AlbumHolder(view);
+            return new AlbumPhotoHolder(view);
         }
 
 
         // bind model to view
         @Override
-        public void onBindViewHolder(AlbumHolder AlbumHolder, int position) {
-            UserAlbum UserAlbum = userAlbums.get(position);
+        public void onBindViewHolder(AlbumPhotoHolder AlbumPhoto, int position) {
+            AlbumPhoto userPhoto = userPhotos.get(position);
 
             // TODO: get better placeholder image
             Drawable placeholder = getResources().getDrawable(R.drawable.placeholder);
-            AlbumHolder.bindUserAlbum(UserAlbum);
+            AlbumPhoto.bindUserPhoto(userPhoto);
 
-            AlbumHolder.bindDrawable(placeholder);
-            AlbumHolder.setText(UserAlbum.getUserName());
+            AlbumPhoto.bindDrawable(placeholder);
+
+            // use normal photo name if no custom name is given
+
+            String customName = userPhoto.getCustom_name();
+            if(customName.equals("null")) {
+                customName = userPhoto.getName();
+            }
+
+            AlbumPhoto.setText(customName);
 
             // make background thread download image thumbnail
             // the reference to the current item is passed on to the downloader
-            thumbnailDownloader.queueThumbnail(AlbumHolder, UserAlbum.getAlbumImageUrl());
+            thumbnailDownloader.queueThumbnail(AlbumPhoto, userPhoto.getThumbImageURL());
 
         }
 
         @Override
         public int getItemCount() {
-            return userAlbums.size();
+            return userPhotos.size();
         }
     }
+
 
     private void updateItems() {
         new FetchAlbumsTask().execute();
     }
-
 
 }

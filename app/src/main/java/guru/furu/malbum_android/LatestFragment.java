@@ -16,8 +16,8 @@ public class LatestFragment extends Fragment {
 
     RecyclerView recyclerView;
 
-    public static AlbumFragment newInstance() {
-        return new AlbumFragment();
+    public static LatestFragment newInstance() {
+        return new LatestFragment();
     }
 
     @Override

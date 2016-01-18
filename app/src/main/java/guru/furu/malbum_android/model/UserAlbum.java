@@ -1,4 +1,4 @@
-package guru.furu.malbum_android;
+package guru.furu.malbum_android.model;
 
 /**
  * Created by richard on 1/12/16.

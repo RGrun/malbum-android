@@ -1,4 +1,4 @@
-package guru.furu.malbum_android;
+package guru.furu.malbum_android.model;
 
 import org.json.JSONException;
 import org.json.JSONObject;

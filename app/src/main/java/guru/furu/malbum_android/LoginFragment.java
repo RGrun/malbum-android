@@ -5,9 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.location.Location;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -22,7 +19,8 @@ import android.widget.Toast;
 import org.json.JSONException;
 
 import java.io.IOException;
-import java.util.List;
+
+import guru.furu.malbum_android.model.MalbumUser;
 
 /**
  * Login Activity's fragment.

@@ -22,6 +22,7 @@
         </activity>
 
         <activity android:name=".TabbedGalleryActivity" />
+        <activity android:name=".SingleUserAlbumActivity" />
 
     </application>
 
