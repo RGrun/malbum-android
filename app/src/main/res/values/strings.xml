@@ -9,4 +9,6 @@
     <string name="login">Login</string>
     <string name="loading">Loading...</string>
     <string name="single_user_album">Single-User Album</string>
+    <string name="new_comment">Add new comment</string>
+    <string name="post_comment">Publish comment</string>
 </resources>

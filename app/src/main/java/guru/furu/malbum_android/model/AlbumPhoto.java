@@ -3,6 +3,8 @@ package guru.furu.malbum_android.model;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.List;
+
 /**
  * Created by richard on 1/18/16.
  *
@@ -21,6 +23,7 @@ public class AlbumPhoto {
     private String description;
     private String custom_name;
     private String hostname;
+    private List<String> comments;
 
     public AlbumPhoto(String hostname, JSONObject json) {
         this.hostname = hostname;
@@ -35,6 +38,7 @@ public class AlbumPhoto {
             description = json.getString("description");
             custom_name = json.getString("custom_name");
             uname = json.getString("uname");
+            comments = null;
 
 
         } catch (JSONException joe) {
@@ -42,6 +46,29 @@ public class AlbumPhoto {
         }
 
     }
+
+    public AlbumPhoto(String hostname, JSONObject json, List<String> comments) {
+        this.hostname = hostname;
+        try {
+            photo_id = json.getInt("photo_id");
+            user_id = json.getInt("user_id");
+            photo_path = json.getString("photo_path");
+            upload_date = json.getString("upload_date");
+            modified_date = json.getString("modified_date");
+            name = json.getString("name");
+            thumb_name = json.getString("thumb_name");
+            description = json.getString("description");
+            custom_name = json.getString("custom_name");
+            uname = json.getString("uname");
+            this.comments = comments;
+
+
+        } catch (JSONException joe) {
+            joe.printStackTrace();
+        }
+
+    }
+
 
     public String getFullImageURL() {
         return "http://" + hostname + "/img/" + uname + "/" + name;
@@ -85,5 +112,13 @@ public class AlbumPhoto {
 
     public String getCustom_name() {
         return custom_name;
+    }
+
+    public List<String> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<String> comments) {
+        this.comments = comments;
     }
 }
