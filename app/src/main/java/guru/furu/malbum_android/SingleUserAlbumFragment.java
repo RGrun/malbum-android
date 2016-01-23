@@ -166,8 +166,11 @@ public class SingleUserAlbumFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            /*Intent i = PhotoPageActivity.newIntent(getActivity(), userAlbum.getPhotoPageUri());
-            startActivity(i);*/
+
+            String photoId = "" + userPhoto.getPhoto_id();
+
+            Intent i = PhotoPageActivity.newIntent(getActivity(), photoId);
+            startActivity(i);
         }
 
 

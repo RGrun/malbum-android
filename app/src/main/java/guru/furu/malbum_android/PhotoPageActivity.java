@@ -78,11 +78,11 @@ public class PhotoPageActivity extends AppCompatActivity {
         toolbar.setTitle(newTitle);
     }
 
-    public static Intent newIntent(Context context, String uname) {
+    public static Intent newIntent(Context context, String photoId) {
 
-        Intent i = new Intent(context, SingleUserAlbumActivity.class);
+        Intent i = new Intent(context, PhotoPageActivity.class);
 
-        i.putExtra("uname", uname);
+        i.putExtra("photo_id", photoId);
 
         return i;
 

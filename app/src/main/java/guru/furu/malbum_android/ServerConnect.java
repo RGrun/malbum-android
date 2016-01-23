@@ -6,14 +6,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -24,6 +27,7 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 
 import guru.furu.malbum_android.model.AlbumPhoto;
+import guru.furu.malbum_android.model.Comment;
 import guru.furu.malbum_android.model.MalbumUser;
 import guru.furu.malbum_android.model.UserAlbum;
 
@@ -46,6 +50,7 @@ public class ServerConnect {
 
     private URL endpoint;
 
+    // TODO: make these methods static instead where possible
 
     // if this constructor is used, we assume this object will be used for
     // logging in to the server.
@@ -358,6 +363,97 @@ public class ServerConnect {
     }
 
 
+    /*
+     *   PHOTO INFORMATION METHODS
+     */
+
+    public static AlbumPhoto getPhotoInformation(String hostname, String apiKey, String photoId) {
+
+        HashMap<String, String> params = new HashMap<>();
+
+        params.put("key", apiKey);
+        params.put("photo_id", photoId);
+
+        URL url = buildURL(hostname, "photo-information", params);
+
+        try {
+            assert url != null;
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+            BufferedInputStream in = new BufferedInputStream(con.getInputStream());
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+            if(con.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                Log.e(DEBUG, "HTTP error.");
+            }
+
+
+            int bytesRead = 0;
+            byte [] buffer = new byte[1024];
+
+            while((bytesRead = in.read(buffer)) > 0) {
+                out.write(buffer, 0, bytesRead);
+            }
+
+            out.close();
+            con.disconnect();
+
+            return parsePhotoInformation(hostname, new String(buffer));
+
+        } catch (IOException ioe) {
+            Log.e(DEBUG, "IO Error.");
+            ioe.printStackTrace();
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
+        }
+
+        // will never reach here
+        return null;
+
+    }
+
+    private static AlbumPhoto parsePhotoInformation(String hostname, String json) {
+
+        try {
+            JSONObject root = new JSONObject(json);
+
+            String status = root.getString("status");
+
+            if(status.equals("ok")) {
+                JSONObject photoData = root.getJSONObject("photo");
+
+                JSONArray comments = root.getJSONArray("comments");
+
+                List<Comment> commentsList = new ArrayList<>();
+
+                for (int i = 0; i < comments.length(); i++) {
+                    JSONObject comment = comments.getJSONObject(i);
+
+                    String uname = comment.getString("uname");
+                    String date = comment.getString("date");
+                    String cmt = comment.getString("comment");
+                    int userId = comment.getInt("user_id");
+                    int photoId = comment.getInt("photo_id");
+                    int commentId = comment.getInt("comment_id");
+
+                    commentsList.add(new Comment(uname, date, cmt, userId, photoId, commentId));
+
+                }
+
+                return new AlbumPhoto(hostname, photoData, commentsList);
+
+            } else {
+                Log.e(DEBUG, "API returned failure result.");
+            }
+
+        } catch (JSONException joe) {
+            Log.e(DEBUG, "Error parsing json.");
+            joe.printStackTrace();
+        }
+
+        // will never reach here
+        return null;
+    }
 
 
     /*
@@ -399,7 +495,7 @@ public class ServerConnect {
     }
 
 
-    private String getPostDataString(HashMap<String, String> params)
+    private static String getPostDataString(HashMap<String, String> params)
             throws UnsupportedEncodingException {
 
         StringBuilder result = new StringBuilder();
@@ -416,5 +512,29 @@ public class ServerConnect {
         }
 
         return result.toString();
+    }
+
+
+    private static URL buildURL(String hostname, String endpoint, HashMap<String, String> params) {
+        StringBuilder output = new StringBuilder();
+
+        String tmp = "http://" + hostname + "/api/" + endpoint + "?";
+
+        output.append(tmp);
+        try {
+            output.append(getPostDataString(params));
+
+            return new URL(output.toString());
+
+        } catch (UnsupportedEncodingException uee) {
+            Log.e(DEBUG, "Error with params hashmap.");
+            uee.printStackTrace();
+        } catch (MalformedURLException mue) {
+            Log.e(DEBUG, "Error with URL.");
+            mue.printStackTrace();
+        }
+
+        // should never reach here
+        return null;
     }
 }

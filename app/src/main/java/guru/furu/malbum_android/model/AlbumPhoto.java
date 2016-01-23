@@ -5,6 +5,8 @@ import org.json.JSONObject;
 
 import java.util.List;
 
+import javax.crypto.Cipher;
+
 /**
  * Created by richard on 1/18/16.
  *
@@ -23,7 +25,7 @@ public class AlbumPhoto {
     private String description;
     private String custom_name;
     private String hostname;
-    private List<String> comments;
+    private List<Comment> comments;
 
     public AlbumPhoto(String hostname, JSONObject json) {
         this.hostname = hostname;
@@ -47,7 +49,7 @@ public class AlbumPhoto {
 
     }
 
-    public AlbumPhoto(String hostname, JSONObject json, List<String> comments) {
+    public AlbumPhoto(String hostname, JSONObject json, List<Comment> comments) {
         this.hostname = hostname;
         try {
             photo_id = json.getInt("photo_id");
@@ -114,11 +116,11 @@ public class AlbumPhoto {
         return custom_name;
     }
 
-    public List<String> getComments() {
+    public List<Comment> getComments() {
         return comments;
     }
 
-    public void setComments(List<String> comments) {
+    public void setComments(List<Comment> comments) {
         this.comments = comments;
     }
 }

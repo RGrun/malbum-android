@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import guru.furu.malbum_android.model.AlbumPhoto;
+import guru.furu.malbum_android.model.MalbumUser;
 
 /**
  * Created by richard on 1/21/16.
@@ -36,6 +37,10 @@ public class PhotoPageFragment extends Fragment {
     private ProgressDialog mProgress;
 
     private AlbumPhoto photo;
+
+    private MalbumUser malbumUser;
+
+    private String photoId;
 
     public static PhotoPageFragment newInstance() {
         return new PhotoPageFragment();
@@ -71,6 +76,9 @@ public class PhotoPageFragment extends Fragment {
             }
         });
 
+        malbumUser = ((PhotoPageActivity) getActivity()).getMalbumUser();
+        photoId = getActivity().getIntent().getStringExtra("photo_id");
+
         fetchPhoto();
 
         return v;
@@ -93,14 +101,14 @@ public class PhotoPageFragment extends Fragment {
         protected AlbumPhoto doInBackground(Void... params) {
 
             try {
-                //TODO: write serverconnect method for getting photo information
-                return new ServerConnect(malbumUser.getHostname(), malbumUser.getApi_key())
-                        .getPhotosForUser(userOfAlbumToDisplay);
+                return ServerConnect.getPhotoInformation(malbumUser.getHostname(),
+                        malbumUser.getApi_key(), photoId);
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            return new ArrayList<>();
+            // (hopefully) never reach here
+            return null;
         }
 
         @Override
