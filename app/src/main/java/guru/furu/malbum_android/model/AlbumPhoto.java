@@ -1,5 +1,8 @@
 package guru.furu.malbum_android.model;
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -25,6 +28,9 @@ public class AlbumPhoto {
     private String description;
     private String custom_name;
     private String hostname;
+
+    private Bitmap photo;
+
     private List<Comment> comments;
 
     public AlbumPhoto(String hostname, JSONObject json) {
@@ -122,5 +128,21 @@ public class AlbumPhoto {
 
     public void setComments(List<Comment> comments) {
         this.comments = comments;
+    }
+
+    public String getUname() {
+        return uname;
+    }
+
+    public String getHostname() {
+        return hostname;
+    }
+
+    public Bitmap getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(Bitmap photo) {
+        this.photo = photo;
     }
 }

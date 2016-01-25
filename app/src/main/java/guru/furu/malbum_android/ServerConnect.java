@@ -1,5 +1,7 @@
 package guru.furu.malbum_android;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -398,7 +400,16 @@ public class ServerConnect {
             out.close();
             con.disconnect();
 
-            return parsePhotoInformation(hostname, new String(buffer));
+            AlbumPhoto photo = parsePhotoInformation(hostname, new String(buffer));
+
+            // grab the image itself
+            byte[] photoBytes = getUrlBytes(photo.getFullImageURL());
+
+            Bitmap bitmap = BitmapFactory.decodeByteArray(photoBytes, 0, photoBytes.length);
+
+            photo.setPhoto(bitmap);
+
+            return photo;
 
         } catch (IOException ioe) {
             Log.e(DEBUG, "IO Error.");
@@ -461,7 +472,7 @@ public class ServerConnect {
      */
 
     // grabs raw bytes from the specified URL
-    public byte[] getUrlBytes(String urlSpec) throws IOException {
+    public static byte[] getUrlBytes(String urlSpec) throws IOException {
         URL url = new URL(urlSpec);
 
         Log.d(DEBUG, "Connecting to: " + url);
@@ -536,5 +547,75 @@ public class ServerConnect {
 
         // should never reach here
         return null;
+    }
+
+    public static boolean postComment(String comment, MalbumUser user, String photoId) {
+
+        try {
+            URL endpoint = new URL("http://" + user.getHostname() + "/api/new-comment");
+
+            HashMap<String, String> postParams = new HashMap<>();
+
+            postParams.put("key", user.getApi_key());
+            postParams.put("photo_id", photoId);
+            postParams.put("comment", comment);
+
+            HttpURLConnection conn = (HttpURLConnection) endpoint.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+
+
+            OutputStream os = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(
+                    new OutputStreamWriter(os, "UTF-8"));
+            writer.write(getPostDataString(postParams));
+
+            writer.flush();
+            writer.close();
+            os.close();
+
+            int responseCode = conn.getResponseCode();
+
+            if (responseCode == HttpsURLConnection.HTTP_OK) {
+
+                InputStream in = conn.getInputStream();
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+                int bytesRead = 0;
+                byte [] buffer = new byte[1024];
+
+                while((bytesRead = in.read(buffer)) > 0) {
+                    out.write(buffer, 0, bytesRead);
+                }
+
+                out.close();
+                conn.disconnect();
+
+                String jsonString = new String(out.toByteArray());
+
+                JSONObject json = new JSONObject(jsonString);
+
+                return json.getString("status").equals("ok");
+
+            } else {
+
+                // TODO: make this throw an exception instead?
+                return false;
+
+            }
+        } catch (MalformedURLException mue) {
+            mue.printStackTrace();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // will never reach here
+        return false;
+
     }
 }

@@ -11,4 +11,7 @@
     <string name="single_user_album">Single-User Album</string>
     <string name="new_comment">Add new comment</string>
     <string name="post_comment">Publish comment</string>
+    <string name="comments">Comments:</string>
+    <string name="comment_posted">Comment successfully posted!</string>
+    <string name="comment_failure">There was a problem posting the new comment.</string>
 </resources>
