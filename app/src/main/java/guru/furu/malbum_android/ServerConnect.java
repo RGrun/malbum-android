@@ -391,7 +391,7 @@ public class ServerConnect {
 
 
             int bytesRead = 0;
-            byte [] buffer = new byte[1024];
+            byte [] buffer = new byte[2048];
 
             while((bytesRead = in.read(buffer)) > 0) {
                 out.write(buffer, 0, bytesRead);
@@ -466,6 +466,92 @@ public class ServerConnect {
         return null;
     }
 
+     /*
+     *   LATEST PHOTOS METHODS
+     */
+
+    public static List<AlbumPhoto> getLatestPhotos(String hostname, String apikey) {
+        return getLatestPhotos(hostname, apikey, 1, 5);
+    }
+
+    public static List<AlbumPhoto> getLatestPhotos(String hostname, String apiKey,
+                                                   int start, int end) {
+        HashMap<String, String> params = new HashMap<>();
+
+        params.put("key", apiKey);
+        params.put("start", "" + start);
+        params.put("end", "" + end);
+
+        URL url = buildURL(hostname, "latest-images", params);
+
+        Log.d(DEBUG + "plpi", url.toString());
+
+        try {
+
+            byte[] buffer = getUrlBytes(url.toString());
+
+
+            List<AlbumPhoto> photos = parseLatestPhotoInformation(hostname, new String(buffer));
+
+
+            return photos;
+
+        } catch (IOException ioe) {
+            Log.e(DEBUG, "IO Error.");
+            ioe.printStackTrace();
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
+        }
+
+        // will never reach here
+        return null;
+    }
+
+    private static List<AlbumPhoto> parseLatestPhotoInformation(String hostname, String json) {
+
+        List<AlbumPhoto> photosToReturn = new ArrayList<>();
+
+        try {
+
+            Log.d(DEBUG, json);
+
+            JSONObject root = new JSONObject(json);
+
+            String status = root.getString("status");
+
+            if(status.equals("ok")) {
+                JSONArray photos = root.getJSONArray("photos");
+
+                for(int i = 0; i < photos.length(); i++) {
+                    JSONObject photo = photos.getJSONObject(i);
+
+                    AlbumPhoto p = new AlbumPhoto(hostname, photo);
+
+                    // grab the image
+                    //byte[] photoBytes = getUrlBytes(p.getFullImageURL());
+
+                    //Bitmap bitmap = BitmapFactory.decodeByteArray(photoBytes, 0, photoBytes.length);
+
+                    //p.setPhoto(bitmap);
+
+                    photosToReturn.add(p);
+                }
+
+                return photosToReturn;
+
+            } else {
+                Log.e(DEBUG, "HTTP Failure when downloading latest images.");
+            }
+
+        } catch (JSONException joe) {
+            Log.e(DEBUG, "Error parsing photo information json.");
+            joe.printStackTrace();
+        }
+
+        // will never reach here
+        return null;
+
+    }
 
     /*
      *   MISC METHODS

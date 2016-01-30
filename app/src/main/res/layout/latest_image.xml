@@ -11,13 +11,15 @@
         android:layout_centerHorizontal="true" />
 
     <ImageView
-        android:layout_width="300dp"
-        android:layout_height="400dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_below="@id/latest_title"
         android:id="@+id/latest_image"
         android:layout_centerHorizontal="true"
-        android:background="#ababab"
-        android:layout_marginTop="10dp" />
+        android:layout_marginTop="10dp"
+        android:padding="2dp"
+        android:minWidth="200dp"
+        android:minHeight="200dp" />
 
     <RelativeLayout
         android:layout_width="match_parent"

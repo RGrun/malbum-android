@@ -10,7 +10,6 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,7 +31,7 @@ import guru.furu.malbum_android.model.MalbumUser;
 public class LatestFragment extends Fragment {
 
     RecyclerView recyclerView;
-    private List<AlbumPhoto> photosForUser;
+    private List<AlbumPhoto> latestPhotos;
     private MalbumUser malbumUser;
     private ThumbnailDownloader<AlbumPhotoHolder> thumbnailDownloader;
 
@@ -49,7 +48,7 @@ public class LatestFragment extends Fragment {
         setRetainInstance(true);
         setHasOptionsMenu(true);
 
-        this.malbumUser = ((SingleUserAlbumActivity)getActivity()).getMalbumUser();
+        this.malbumUser = ((TabbedGalleryActivity)getActivity()).getMalbumUser();
 
         // this Handler belongs to the UI Thread's Looper
         // because it's created in the UI Thread.
@@ -69,7 +68,7 @@ public class LatestFragment extends Fragment {
         thumbnailDownloader.start();
         thumbnailDownloader.getLooper();
         Log.i(DEBUG, "Background thread started.");
-        photosForUser = new ArrayList<>();
+        latestPhotos = new ArrayList<>();
         updateItems();
     }
 
@@ -94,7 +93,7 @@ public class LatestFragment extends Fragment {
 
         // isAdded() checks to see if the fragment is hosted inside an activity
         if(isAdded()) {
-            recyclerView.setAdapter(new AlbumAdapter(photosForUser));
+            recyclerView.setAdapter(new AlbumAdapter(latestPhotos));
         }
     }
 
@@ -198,6 +197,14 @@ public class LatestFragment extends Fragment {
 
             AlbumPhoto.setPhotoTitle(customName);
 
+            AlbumPhoto.setPhotoUser(userPhoto.getUname());
+            AlbumPhoto.setPhotoDate(userPhoto.getUpload_date());
+
+
+            /*Drawable drawable = new BitmapDrawable(getResources(), userPhoto.getPhoto());
+
+            AlbumPhoto.bindDrawable(drawable);*/
+
             // make background thread download image thumbnail
             // the reference to the current item is passed on to the downloader
             thumbnailDownloader.queueThumbnail(AlbumPhoto, userPhoto.getThumbImageURL());
@@ -220,9 +227,8 @@ public class LatestFragment extends Fragment {
 
             try {
 
-                //TODO: write this method in both ServerConnect and also server response
-                return new ServerConnect(malbumUser.getHostname(), malbumUser.getApi_key())
-                        .getPhotosForUser(userOfAlbumToDisplay);
+                return ServerConnect.getLatestPhotos(malbumUser.getHostname(),
+                        malbumUser.getApi_key());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -232,7 +238,7 @@ public class LatestFragment extends Fragment {
 
         @Override
         protected void onPostExecute(List<AlbumPhoto> items) {
-            photosForUser = items;
+            latestPhotos = items;
             setupAdapter();
         }
     }

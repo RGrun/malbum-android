@@ -68,6 +68,12 @@ public class AlbumFragment extends Fragment {
         thumbnailDownloader.getLooper();
         Log.i(DEBUG, "Background thread started.");
         albums = new ArrayList<>();
+        //updateItems();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         updateItems();
     }
 
