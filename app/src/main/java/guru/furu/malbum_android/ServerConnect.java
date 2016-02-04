@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -25,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -44,6 +44,10 @@ public class ServerConnect {
     private static final String USERNAME = "uname";
     private static final String PASSWORD = "pwd";
     private static final String API_KEY = "key";
+
+
+    // TODO: remove default port (and make user enter it as part of the hostname)?
+    public static final String DEFAULT_PORT = ":3000";
 
     private String hostname;
     private String username;
@@ -83,7 +87,7 @@ public class ServerConnect {
         throws JSONException, IOException{
 
 
-        endpoint = new URL("http://" + hostname + "/api/login");
+        endpoint = new URL("http://" + hostname + DEFAULT_PORT + "/api/login");
 
         HashMap<String, String> postParams = new HashMap<>();
 
@@ -180,7 +184,8 @@ public class ServerConnect {
                     String uname = thumb.getString("uname");
                     String thumbName = thumb.getString("thumb_name");
 
-                    String thumbPath = "http://" + hostname + "/img/" + uname + "/" + thumbName;
+                    String thumbPath = "http://" + hostname + DEFAULT_PORT +
+                            "/img/" + uname + "/" + thumbName;
 
                     UserAlbum album = new UserAlbum(uname, thumbPath);
 
@@ -209,7 +214,7 @@ public class ServerConnect {
             throws JSONException, IOException{
 
 
-        endpoint = new URL("http://" + hostname + "/api/albums");
+        endpoint = new URL("http://" + hostname + DEFAULT_PORT + "/api/albums");
 
         HashMap<String, String> postParams = new HashMap<>();
 
@@ -270,7 +275,7 @@ public class ServerConnect {
     public List<AlbumPhoto> getPhotosForUser(String username)
             throws JSONException, IOException {
 
-        endpoint = new URL("http://" + hostname + "/api/photos-for-user/" + username);
+        endpoint = new URL("http://" + hostname + DEFAULT_PORT + "/api/photos-for-user/" + username);
 
         HashMap<String, String> postParams = new HashMap<>();
 
@@ -471,7 +476,7 @@ public class ServerConnect {
      */
 
     public static List<AlbumPhoto> getLatestPhotos(String hostname, String apikey) {
-        return getLatestPhotos(hostname, apikey, 1, 5);
+        return getLatestPhotos(hostname, apikey, 0, 5);
     }
 
     public static List<AlbumPhoto> getLatestPhotos(String hostname, String apiKey,
@@ -615,7 +620,7 @@ public class ServerConnect {
     private static URL buildURL(String hostname, String endpoint, HashMap<String, String> params) {
         StringBuilder output = new StringBuilder();
 
-        String tmp = "http://" + hostname + "/api/" + endpoint + "?";
+        String tmp = "http://" + hostname + DEFAULT_PORT + "/api/" + endpoint + "?";
 
         output.append(tmp);
         try {
@@ -638,7 +643,8 @@ public class ServerConnect {
     public static boolean postComment(String comment, MalbumUser user, String photoId) {
 
         try {
-            URL endpoint = new URL("http://" + user.getHostname() + "/api/new-comment");
+            URL endpoint = new URL("http://" + user.getHostname() + DEFAULT_PORT +
+                    "/api/new-comment");
 
             HashMap<String, String> postParams = new HashMap<>();
 

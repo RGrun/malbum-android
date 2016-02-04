@@ -10,6 +10,8 @@ import java.util.List;
 
 import javax.crypto.Cipher;
 
+import guru.furu.malbum_android.ServerConnect;
+
 /**
  * Created by richard on 1/18/16.
  *
@@ -79,11 +81,11 @@ public class AlbumPhoto {
 
 
     public String getFullImageURL() {
-        return "http://" + hostname + "/img/" + uname + "/" + name;
+        return "http://" + hostname + ServerConnect.DEFAULT_PORT + "/img/" + uname + "/" + name;
     }
 
     public String getThumbImageURL() {
-        return "http://" + hostname + "/img/" + uname + "/" + thumb_name;
+        return "http://" + hostname + ServerConnect.DEFAULT_PORT + "/img/" + uname + "/" + thumb_name;
     }
 
     public int getPhoto_id() {
