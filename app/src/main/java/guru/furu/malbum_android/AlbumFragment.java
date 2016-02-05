@@ -132,8 +132,7 @@ public class AlbumFragment extends Fragment {
         protected List<UserAlbum> doInBackground(Void... params) {
 
             try {
-                return new ServerConnect(malbumUser.getHostname(), malbumUser.getApi_key())
-                        .fetchAlbums();
+                return ServerConnect.fetchAlbums(malbumUser.getHostname(), malbumUser.getApi_key());
             } catch (Exception e) {
                 e.printStackTrace();
             }

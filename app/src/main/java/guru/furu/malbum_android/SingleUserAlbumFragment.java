@@ -135,8 +135,10 @@ public class SingleUserAlbumFragment extends Fragment {
         protected List<AlbumPhoto> doInBackground(Void... params) {
 
             try {
-                return new ServerConnect(malbumUser.getHostname(), malbumUser.getApi_key())
-                        .getPhotosForUser(userOfAlbumToDisplay);
+                return ServerConnect.getPhotosForUser(malbumUser.getHostname(),
+                        malbumUser.getApi_key(),
+                        userOfAlbumToDisplay);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }

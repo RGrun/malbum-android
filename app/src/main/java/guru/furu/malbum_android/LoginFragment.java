@@ -143,8 +143,8 @@ public class LoginFragment extends Fragment {
 
             try {
 
-                MalbumUser userObject = new ServerConnect(serverHostname, username, password)
-                        .attemptLogin();
+                MalbumUser userObject =
+                        ServerConnect.attemptLogin(serverHostname, username, password);
 
                 debugUserObject(userObject);
 

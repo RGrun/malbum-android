@@ -49,45 +49,17 @@ public class ServerConnect {
     // TODO: remove default port (and make user enter it as part of the hostname)?
     public static final String DEFAULT_PORT = ":3000";
 
-    private String hostname;
-    private String username;
-    private String password;
-    private String apiKey;
-
-    private URL endpoint;
-
-    // TODO: make these methods static instead where possible
-
-    // if this constructor is used, we assume this object will be used for
-    // logging in to the server.
-    public ServerConnect(String hostname, String username, String password) {
-
-        this.hostname = hostname;
-        this.username = username;
-        this.password = password;
-
-    }
-
-    // this constructor is for more general queries.
-    public ServerConnect(String hostname, String key) {
-        this.hostname = hostname;
-        this.apiKey = key;
-    }
-
-    // this constructor is for using getUrlBytes()
-    public ServerConnect() {}
-
 
     /*
      *   LOGIN METHODS
      */
 
     // returns null object upon failed connection
-    public MalbumUser attemptLogin()
+    public static MalbumUser attemptLogin(String hostname, String username, String password)
         throws JSONException, IOException{
 
 
-        endpoint = new URL("http://" + hostname + DEFAULT_PORT + "/api/login");
+        URL endpoint = new URL("http://" + hostname + DEFAULT_PORT + "/api/login");
 
         HashMap<String, String> postParams = new HashMap<>();
 
@@ -130,7 +102,7 @@ public class ServerConnect {
 
             String jsonString = new String(out.toByteArray());
 
-            return parseLogin(jsonString);
+            return parseLogin(jsonString, hostname);
 
         } else {
 
@@ -142,7 +114,7 @@ public class ServerConnect {
     }
 
     // JSON parsing
-    private MalbumUser parseLogin(String jsonString)
+    private static MalbumUser parseLogin(String jsonString, String hostname)
             throws IOException, JSONException {
 
         JSONObject jsonBody = new JSONObject(jsonString);
@@ -164,7 +136,7 @@ public class ServerConnect {
      *   GET LATEST ALBUMS METHODS
      */
 
-    private List<UserAlbum> parseAlbums(String jsonString) {
+    private static List<UserAlbum> parseAlbums(String hostname, String jsonString) {
 
         List<UserAlbum> albums = new ArrayList<>();
 
@@ -210,60 +182,39 @@ public class ServerConnect {
         return null;
     }
 
-    public List<UserAlbum> fetchAlbums()
+    public static List<UserAlbum> fetchAlbums(String hostname, String apiKey)
             throws JSONException, IOException{
 
 
-        endpoint = new URL("http://" + hostname + DEFAULT_PORT + "/api/albums");
+        HashMap<String, String> params = new HashMap<>();
 
-        HashMap<String, String> postParams = new HashMap<>();
+        params.put(API_KEY, apiKey);
 
-        postParams.put(API_KEY, apiKey);
+        URL url = buildURL(hostname, "albums", params);
 
-        HttpURLConnection conn = (HttpURLConnection) endpoint.openConnection();
-        conn.setReadTimeout(15000);
-        conn.setConnectTimeout(15000);
-        conn.setRequestMethod("POST");
-        conn.setDoInput(true);
-        conn.setDoOutput(true);
+        Log.d(DEBUG + "plpi", url.toString());
+
+        try {
+
+            byte[] buffer = getUrlBytes(url.toString());
+
+            Log.d(DEBUG + "fetchAlbum", new String(buffer));
 
 
-        OutputStream os = conn.getOutputStream();
-        BufferedWriter writer = new BufferedWriter(
-                new OutputStreamWriter(os, "UTF-8"));
-        writer.write(getPostDataString(postParams));
+            List<UserAlbum> photos = parseAlbums(hostname, new String(buffer));
 
-        writer.flush();
-        writer.close();
-        os.close();
 
-        int responseCode = conn.getResponseCode();
+            return photos;
 
-        if (responseCode == HttpsURLConnection.HTTP_OK) {
-
-            InputStream in = conn.getInputStream();
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-            int bytesRead = 0;
-            byte [] buffer = new byte[1024];
-
-            while((bytesRead = in.read(buffer)) > 0) {
-                out.write(buffer, 0, bytesRead);
-            }
-
-            out.close();
-            conn.disconnect();
-
-            String jsonString = new String(out.toByteArray());
-
-            return parseAlbums(jsonString);
-
-        } else {
-
-            // TODO: make this throw an exception instead?
-            return null;
-
+        } catch (IOException ioe) {
+            Log.e(DEBUG, "IO Error.");
+            ioe.printStackTrace();
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
         }
+
+        // will never reach here
+        return null;
 
     }
 
@@ -272,63 +223,41 @@ public class ServerConnect {
      *
      */
 
-    public List<AlbumPhoto> getPhotosForUser(String username)
+    public static List<AlbumPhoto> getPhotosForUser(String hostname, String apiKey, String username)
             throws JSONException, IOException {
 
-        endpoint = new URL("http://" + hostname + DEFAULT_PORT + "/api/photos-for-user/" + username);
 
-        HashMap<String, String> postParams = new HashMap<>();
+        HashMap<String, String> params = new HashMap<>();
 
-        postParams.put(API_KEY, apiKey);
+        params.put(API_KEY, apiKey);
 
-        HttpURLConnection conn = (HttpURLConnection) endpoint.openConnection();
-        conn.setReadTimeout(15000);
-        conn.setConnectTimeout(15000);
-        conn.setRequestMethod("POST");
-        conn.setDoInput(true);
-        conn.setDoOutput(true);
+        URL url = buildURL(hostname, "photos-for-user", params, username);
+
+        Log.d(DEBUG + "pfu", url.toString());
+
+        try {
+
+            byte[] buffer = getUrlBytes(url.toString());
 
 
-        OutputStream os = conn.getOutputStream();
-        BufferedWriter writer = new BufferedWriter(
-                new OutputStreamWriter(os, "UTF-8"));
-        writer.write(getPostDataString(postParams));
+            List<AlbumPhoto> photos = parseAlbumPhotos(hostname, new String(buffer));
 
-        writer.flush();
-        writer.close();
-        os.close();
 
-        int responseCode = conn.getResponseCode();
+            return photos;
 
-        if (responseCode == HttpsURLConnection.HTTP_OK) {
-
-            InputStream in = conn.getInputStream();
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-            int bytesRead = 0;
-            byte [] buffer = new byte[1024];
-
-            while((bytesRead = in.read(buffer)) > 0) {
-                out.write(buffer, 0, bytesRead);
-            }
-
-            out.close();
-            conn.disconnect();
-
-            String jsonString = new String(out.toByteArray());
-
-            return parseAlbumPhotos(jsonString);
-
-        } else {
-
-            // TODO: make this throw an exception instead?
-            return null;
-
+        } catch (IOException ioe) {
+            Log.e(DEBUG, "IO Error.");
+            ioe.printStackTrace();
+        } catch (NullPointerException npe) {
+            npe.printStackTrace();
         }
+
+        // will never reach here
+        return null;
 
     }
 
-    private List<AlbumPhoto> parseAlbumPhotos(String jsonString) {
+    private static List<AlbumPhoto> parseAlbumPhotos(String hostname, String jsonString) {
 
         List<AlbumPhoto> albums = new ArrayList<>();
 
@@ -621,6 +550,34 @@ public class ServerConnect {
         StringBuilder output = new StringBuilder();
 
         String tmp = "http://" + hostname + DEFAULT_PORT + "/api/" + endpoint + "?";
+
+        output.append(tmp);
+        try {
+            output.append(getPostDataString(params));
+
+            return new URL(output.toString());
+
+        } catch (UnsupportedEncodingException uee) {
+            Log.e(DEBUG, "Error with params hashmap.");
+            uee.printStackTrace();
+        } catch (MalformedURLException mue) {
+            Log.e(DEBUG, "Error with URL.");
+            mue.printStackTrace();
+        }
+
+        // should never reach here
+        return null;
+    }
+
+    // version for "photos-for-user"
+    private static URL buildURL(String hostname, String endpoint,
+                                HashMap<String, String> params,
+                                String username) {
+
+        StringBuilder output = new StringBuilder();
+
+        String tmp = "http://" + hostname + DEFAULT_PORT + "/api/" + endpoint +
+                "/" + username + "?";
 
         output.append(tmp);
         try {
