@@ -14,4 +14,6 @@
     <string name="comments">Comments:</string>
     <string name="comment_posted">Comment successfully posted!</string>
     <string name="comment_failure">There was a problem posting the new comment.</string>
+    <string name="upload_instructions_1">Tap the icon below to take a new picture.</string>
+    <string name="upload">Upload Image!</string>
 </resources>

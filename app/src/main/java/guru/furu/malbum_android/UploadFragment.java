@@ -8,6 +8,9 @@ import android.view.ViewGroup;
 
 /**
  * Created by richard on 1/10/16.
+ *
+ * This fragment is responsible for communicating with the camera app
+ * and uploading the new image to the server.
  */
 public class UploadFragment extends Fragment {
 
