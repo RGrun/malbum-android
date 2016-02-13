@@ -1,4 +1,4 @@
-package guru.furu.malbum_android;
+package guru.furu.malbum_android.activities;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -14,6 +14,11 @@ import android.view.MenuItem;
 
 import java.util.Map;
 
+import guru.furu.malbum_android.R;
+import guru.furu.malbum_android.fragments.AlbumFragment;
+import guru.furu.malbum_android.fragments.LatestFragment;
+import guru.furu.malbum_android.fragments.LoginFragment;
+import guru.furu.malbum_android.fragments.UploadFragment;
 import guru.furu.malbum_android.model.MalbumUser;
 
 /**

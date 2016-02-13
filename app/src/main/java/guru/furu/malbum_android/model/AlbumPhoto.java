@@ -1,16 +1,17 @@
 package guru.furu.malbum_android.model;
 
+import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
+import android.os.Environment;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.util.Date;
 import java.util.List;
 
-import javax.crypto.Cipher;
-
-import guru.furu.malbum_android.ServerConnect;
+import guru.furu.malbum_android.util.ServerConnect;
 
 /**
  * Created by richard on 1/18/16.
@@ -31,6 +32,9 @@ public class AlbumPhoto {
     private String custom_name;
     private String hostname;
 
+    // filename on Android device
+    private String fileName;
+
     private Bitmap photo;
 
     private List<Comment> comments;
@@ -49,6 +53,8 @@ public class AlbumPhoto {
             custom_name = json.getString("custom_name");
             uname = json.getString("uname");
             comments = null;
+
+            setPhotoFilename("IMG_" + name + ".jpg");
 
 
         } catch (JSONException joe) {
@@ -72,6 +78,7 @@ public class AlbumPhoto {
             uname = json.getString("uname");
             this.comments = comments;
 
+            setPhotoFilename("IMG_" + name + ".jpg");
 
         } catch (JSONException joe) {
             joe.printStackTrace();
@@ -79,6 +86,10 @@ public class AlbumPhoto {
 
     }
 
+    // this constructor is needed for the image upload progress
+    public AlbumPhoto() {
+        // stub
+    }
 
     public String getFullImageURL() {
         return "http://" + hostname + ServerConnect.DEFAULT_PORT + "/img/" + uname + "/" + name;
@@ -146,5 +157,23 @@ public class AlbumPhoto {
 
     public void setPhoto(Bitmap photo) {
         this.photo = photo;
+    }
+
+    public void setPhotoFilename(String newname) {
+        this.fileName = newname;
+    }
+
+    public String getPhotoFilename() {
+        return fileName;
+    }
+
+    public static File getPhotoFile(Context context, AlbumPhoto photo) {
+        File externalFilesDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+        if (externalFilesDir == null) {
+            return null;
+        }
+
+        return new File(externalFilesDir, photo.getPhotoFilename());
     }
 }

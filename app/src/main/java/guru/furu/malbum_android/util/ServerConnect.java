@@ -1,4 +1,4 @@
-package guru.furu.malbum_android;
+package guru.furu.malbum_android.util;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;

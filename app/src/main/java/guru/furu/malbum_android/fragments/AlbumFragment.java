@@ -1,4 +1,4 @@
-package guru.furu.malbum_android;
+package guru.furu.malbum_android.fragments;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -20,6 +20,11 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import guru.furu.malbum_android.R;
+import guru.furu.malbum_android.util.ServerConnect;
+import guru.furu.malbum_android.activities.SingleUserAlbumActivity;
+import guru.furu.malbum_android.activities.TabbedGalleryActivity;
+import guru.furu.malbum_android.util.ThumbnailDownloader;
 import guru.furu.malbum_android.model.MalbumUser;
 import guru.furu.malbum_android.model.UserAlbum;
 

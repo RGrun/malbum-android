@@ -1,4 +1,4 @@
-package guru.furu.malbum_android;
+package guru.furu.malbum_android.activities;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,20 +10,23 @@ import android.support.v7.widget.Toolbar;
 
 import java.util.Map;
 
+import guru.furu.malbum_android.R;
+import guru.furu.malbum_android.fragments.LoginFragment;
+import guru.furu.malbum_android.fragments.PhotoPageFragment;
 import guru.furu.malbum_android.model.MalbumUser;
 
 /**
- * Created by richard on 1/18/16.
+ * Created by richard on 1/17/16.
  *
- * The Activity that holds a SingleUserAlbumFragment.
+ * This displays information relating to a single photo.
  */
-public class SingleUserAlbumActivity extends AppCompatActivity {
+public class PhotoPageActivity extends AppCompatActivity {
 
     private MalbumUser malbumUser;
     private Toolbar toolbar;
 
     private Fragment createFragment() {
-        return SingleUserAlbumFragment.newInstance();
+        return PhotoPageFragment.newInstance();
     }
 
     @Override
@@ -43,9 +46,9 @@ public class SingleUserAlbumActivity extends AppCompatActivity {
         }
 
         this.toolbar = (Toolbar) findViewById(R.id.toolbar);
-        String usernameOfAlbumOwner = getIntent().getStringExtra("uname");
+        /*String usernameOfAlbumOwner = getIntent().getStringExtra("uname");
 
-        toolbar.setTitle(usernameOfAlbumOwner + "'s Photos");
+        toolbar.setTitle(usernameOfAlbumOwner + "'s Photos");*/
         setSupportActionBar(toolbar);
 
 
@@ -78,14 +81,15 @@ public class SingleUserAlbumActivity extends AppCompatActivity {
         toolbar.setTitle(newTitle);
     }
 
-    public static Intent newIntent(Context context, String uname) {
+    public static Intent newIntent(Context context, String photoId) {
 
-        Intent i = new Intent(context, SingleUserAlbumActivity.class);
+        Intent i = new Intent(context, PhotoPageActivity.class);
 
-        i.putExtra("uname", uname);
+        i.putExtra("photo_id", photoId);
 
         return i;
 
 
     }
+
 }

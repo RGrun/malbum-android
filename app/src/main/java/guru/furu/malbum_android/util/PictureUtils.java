@@ -1,9 +1,16 @@
-package guru.furu.malbum_android;
+package guru.furu.malbum_android.util;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.util.Log;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Created by richard on 2/9/16.
@@ -11,6 +18,9 @@ import android.graphics.Point;
  * Camera bitmap-related things
  */
 public class PictureUtils {
+
+    private static final String DEBUG = "PictureUtils";
+
     public static Bitmap getScaledBitmap(String path, int destWidth, int destHeight) {
 
         // read in the dimensions of the image on disk
@@ -23,20 +33,38 @@ public class PictureUtils {
         float srcHeight = options.outHeight;
 
         // figure out how much to scale down by
-        int inSampleSize = 1;
-        if(srcHeight > destHeight || srcWidth > destWidth) {
+        int inSampleSize = 2;
+        /*if(srcHeight > destHeight || srcWidth > destWidth) {
             if(srcWidth > srcHeight) {
                 inSampleSize = Math.round(srcHeight / destHeight);
             } else {
                 inSampleSize = Math.round(srcWidth / destWidth);
             }
-        }
+        }*/
 
         options = new BitmapFactory.Options();
         options.inSampleSize = inSampleSize;
 
         // read in and create final bitmap
-        return BitmapFactory.decodeFile(path, options);
+        Bitmap bt = BitmapFactory.decodeFile(path, options);
+
+        // compress bitmap to reduce file size
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        bt.compress(Bitmap.CompressFormat.JPEG, 40, out);
+
+        Bitmap compressed = BitmapFactory.decodeStream(new ByteArrayInputStream(out.toByteArray()));
+
+        try {
+            // save scaled version over bigger one on disk
+            FileOutputStream fw = new FileOutputStream(path);
+
+            fw.write(out.toByteArray(), 0, out.size());
+            fw.close();
+        } catch (IOException ioe) {
+            Log.e(DEBUG, "Error saving scaled file!");
+        }
+
+        return compressed;
 
     }
 

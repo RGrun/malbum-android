@@ -1,4 +1,4 @@
-package guru.furu.malbum_android;
+package guru.furu.malbum_android.fragments;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
@@ -20,6 +20,9 @@ import org.json.JSONException;
 
 import java.io.IOException;
 
+import guru.furu.malbum_android.R;
+import guru.furu.malbum_android.util.ServerConnect;
+import guru.furu.malbum_android.activities.TabbedGalleryActivity;
 import guru.furu.malbum_android.model.MalbumUser;
 
 /**
