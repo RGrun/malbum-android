@@ -11,6 +11,9 @@ import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,6 +21,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -44,6 +48,9 @@ public class ServerConnect {
     private static final String USERNAME = "uname";
     private static final String PASSWORD = "pwd";
     private static final String API_KEY = "key";
+    private static final String FILE = "file";
+    private static final String NAME = "cname";
+    private static final String DESCRIPTION = "cdescrip";
 
 
     // TODO: remove default port (and make user enter it as part of the hostname)?
@@ -461,13 +468,6 @@ public class ServerConnect {
 
                     AlbumPhoto p = new AlbumPhoto(hostname, photo);
 
-                    // grab the image
-                    //byte[] photoBytes = getUrlBytes(p.getFullImageURL());
-
-                    //Bitmap bitmap = BitmapFactory.decodeByteArray(photoBytes, 0, photoBytes.length);
-
-                    //p.setPhoto(bitmap);
-
                     photosToReturn.add(p);
                 }
 
@@ -485,6 +485,159 @@ public class ServerConnect {
         // will never reach here
         return null;
 
+    }
+
+     /*
+     *   POST PHOTO METHODS
+     */
+
+    // this method uploads a new image to the server
+    public static boolean postPhoto(MalbumUser user,
+                                    File photo,
+                                    String customName,
+                                    String customDescription) {
+
+        // this is gonna get ugly (thanks multipart form params)
+
+        String attachmentName = FILE;
+        String attachmentFileName = photo.getName();
+        String crlf = "\r\n";
+        String twoHyphens = "--";
+        String boundary =  "*****";
+
+        try {
+            URL endpoint = new URL("http://" + user.getHostname() + DEFAULT_PORT + "/api/upload");
+
+            HttpURLConnection conn = (HttpURLConnection) endpoint.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setUseCaches(false);
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+
+
+            conn.setRequestProperty("Connection", "Keep-Alive");
+            conn.setRequestProperty("Cache-Control", "no-cache");
+
+            conn.setRequestProperty(
+                    "Content-Type", "multipart/form-data;boundary=" + boundary);
+
+            DataOutputStream request = new DataOutputStream(
+                    conn.getOutputStream());
+
+            // multipart form params:
+            request.writeBytes(twoHyphens + boundary + crlf);
+            request.writeBytes("Content-Disposition: form-data; name=\"key\""+ crlf);
+            request.writeBytes(crlf);
+            request.writeBytes(user.getApi_key());
+            request.writeBytes(crlf);
+            request.writeBytes(twoHyphens + boundary + crlf);
+
+            request.writeBytes(twoHyphens + boundary + crlf);
+            request.writeBytes("Content-Disposition: form-data; name=\"cname\""+ crlf);
+            request.writeBytes(crlf);
+            request.writeBytes(customName);
+            request.writeBytes(crlf);
+            request.writeBytes(twoHyphens + boundary + crlf);
+
+            request.writeBytes(twoHyphens + boundary + crlf);
+            request.writeBytes("Content-Disposition: form-data; name=\"cdescrip\""+ crlf);
+            request.writeBytes(crlf);
+            request.writeBytes(customDescription);
+            request.writeBytes(crlf);
+            request.writeBytes(twoHyphens + boundary + crlf);
+
+            // this crap gives me a whole new appreciation for Firefox form uploads
+
+            request.writeBytes(twoHyphens + boundary + crlf);
+            request.writeBytes("Content-Disposition: form-data; name=\"" +
+                    attachmentName + "\";filename=\"" +
+                    attachmentFileName + "\"" + crlf);
+            request.writeBytes("Content-Type: image/jpeg" + crlf);
+            request.writeBytes(crlf);
+
+            int br, bytesAvailable, bufferSize;
+            byte[] bf;
+            int maxBufferSize = 1 * 1024 * 1024;
+
+            // stream file from disk into request
+            FileInputStream fileInputStream = new FileInputStream(new File(
+                    photo.getPath()));
+
+            bytesAvailable = fileInputStream.available();
+            bufferSize = Math.min(bytesAvailable, maxBufferSize);
+            bf = new byte[bufferSize];
+
+            br = fileInputStream.read(bf, 0, bufferSize);
+
+            while (br > 0) {
+                request.write(bf, 0, bufferSize);
+                bytesAvailable = fileInputStream.available();
+                bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                br = fileInputStream.read(bf, 0, bufferSize);
+            }
+
+            request.writeBytes(crlf);
+            request.writeBytes(twoHyphens + boundary +
+                    twoHyphens + crlf);
+
+            request.flush();
+            request.close();
+
+
+            int responseCode = conn.getResponseCode();
+
+            if (responseCode == HttpsURLConnection.HTTP_OK) {
+
+                InputStream in = conn.getInputStream();
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+                int bytesRead = 0;
+                byte [] buffer = new byte[1024];
+
+                while((bytesRead = in.read(buffer)) > 0) {
+                    out.write(buffer, 0, bytesRead);
+                }
+
+                out.close();
+                conn.disconnect();
+
+                String jsonString = new String(out.toByteArray());
+
+                return parsePhotoUploadResponse(jsonString);
+
+            } else {
+
+                return false;
+
+            }
+        } catch (MalformedURLException mue) {
+            Log.e(DEBUG, "URL Error: " + mue.getMessage());
+        } catch (ProtocolException pe) {
+            Log.e(DEBUG, "Protocol Error: " + pe.getMessage());
+        } catch (IOException ioe) {
+            Log.e(DEBUG, "IO Error: " + ioe.getMessage());
+        }
+        // will never reach here
+        return false;
+    }
+
+    private static boolean parsePhotoUploadResponse(String json) {
+
+        try {
+            JSONObject root = new JSONObject(json);
+
+            String status = root.getString("status");
+
+            return status.equals("ok");
+
+        } catch (JSONException joe) {
+            Log.e(DEBUG, "Json parsing error: " + joe.getMessage());
+        }
+
+        // should never reach here
+        return false;
     }
 
     /*

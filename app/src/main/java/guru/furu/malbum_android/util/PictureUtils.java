@@ -34,13 +34,7 @@ public class PictureUtils {
 
         // figure out how much to scale down by
         int inSampleSize = 2;
-        /*if(srcHeight > destHeight || srcWidth > destWidth) {
-            if(srcWidth > srcHeight) {
-                inSampleSize = Math.round(srcHeight / destHeight);
-            } else {
-                inSampleSize = Math.round(srcWidth / destWidth);
-            }
-        }*/
+
 
         options = new BitmapFactory.Options();
         options.inSampleSize = inSampleSize;

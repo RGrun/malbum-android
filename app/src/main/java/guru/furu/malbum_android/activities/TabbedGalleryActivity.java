@@ -34,6 +34,10 @@ public class TabbedGalleryActivity extends AppCompatActivity {
     private ViewPager viewPager;
     private MalbumUser malbumUser;
 
+    public static final int LATEST_TAB = 0;
+    public static final int ALBUM_TAB = 1;
+    public static final int UPLOAD_TAB = 2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,6 +141,11 @@ public class TabbedGalleryActivity extends AppCompatActivity {
 
     public MalbumUser getMalbumUser() {
         return malbumUser;
+    }
+
+
+    public void setCurrentTab(int tabIndex) {
+        viewPager.setCurrentItem(tabIndex);
     }
 
     @Override

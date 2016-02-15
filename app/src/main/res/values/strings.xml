@@ -16,4 +16,8 @@
     <string name="comment_failure">There was a problem posting the new comment.</string>
     <string name="upload_instructions_1">Tap the icon below to take a new picture.</string>
     <string name="upload">Upload Image!</string>
+    <string name="custom_photo_name">Name Your Photo</string>
+    <string name="photo_description">Photo Description</string>
+    <string name="upload_success">Photo upload was successful!</string>
+    <string name="upload_failure">Photo upload failed :(</string>
 </resources>

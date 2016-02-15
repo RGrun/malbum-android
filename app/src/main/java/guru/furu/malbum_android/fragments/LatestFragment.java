@@ -74,7 +74,7 @@ public class LatestFragment extends Fragment {
         thumbnailDownloader.getLooper();
         Log.i(DEBUG, "Background thread started.");
         latestPhotos = new ArrayList<>();
-        updateItems();
+        //updateItems();
     }
 
     @Override
@@ -100,6 +100,12 @@ public class LatestFragment extends Fragment {
         if(isAdded()) {
             recyclerView.setAdapter(new AlbumAdapter(latestPhotos));
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateItems();
     }
 
     @Override
@@ -187,7 +193,6 @@ public class LatestFragment extends Fragment {
         public void onBindViewHolder(AlbumPhotoHolder AlbumPhoto, int position) {
             AlbumPhoto userPhoto = userPhotos.get(position);
 
-            // TODO: get better placeholder image
             Drawable placeholder = getResources().getDrawable(R.drawable.placeholder);
             AlbumPhoto.bindUserPhoto(userPhoto);
 

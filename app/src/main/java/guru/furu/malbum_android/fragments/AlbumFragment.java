@@ -95,14 +95,6 @@ public class AlbumFragment extends Fragment {
         thumbnailDownloader.clearQueue();
     }
 
-    /*@Override
-    public void onStop() {
-        super.onStop();
-        thumbnailDownloader.clearQueue();
-        thumbnailDownloader.quit();
-        Log.i(DEBUG, "Background thread destroyed.");
-    }*/
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                             Bundle savedInstanceState) {

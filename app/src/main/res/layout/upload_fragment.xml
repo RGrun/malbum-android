@@ -5,6 +5,8 @@
 
     <LinearLayout
         android:orientation="vertical" android:layout_width="match_parent"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true"
         android:layout_height="wrap_content">
 
         <TextView
@@ -25,6 +27,26 @@
             android:layout_gravity="center_horizontal"
             android:maxWidth="400dp" />
 
+        <EditText
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/upload_custom_name"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:hint="@string/custom_photo_name" />
+
+        <EditText
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/upload_comment"
+            android:layout_marginLeft="30dp"
+            android:layout_marginRight="30dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:hint="@string/photo_description" />
+
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -32,5 +54,6 @@
             android:id="@+id/upload_button"
             android:layout_gravity="center_horizontal"
             android:enabled="false" />
+
     </LinearLayout>
 </ScrollView>
