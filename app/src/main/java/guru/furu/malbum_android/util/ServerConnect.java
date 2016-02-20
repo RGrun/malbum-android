@@ -627,7 +627,7 @@ public class ServerConnect {
 
         try {
             JSONObject root = new JSONObject(json);
-
+            
             String status = root.getString("status");
 
             return status.equals("ok");

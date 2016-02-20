@@ -70,18 +70,21 @@ public class UploadFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        user = ((TabbedGalleryActivity)getActivity()).getMalbumUser();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v =  inflater.inflate(R.layout.upload_fragment, container, false);
 
-        if(imageToUpload == null) {
-            imageToUpload = new AlbumPhoto();
-            imageToUpload.setPhotoFilename("IMG_" + new Date() + ".jpg");
-        }
 
-        if(photoFile == null) {
-            photoFile = AlbumPhoto.getPhotoFile(getActivity(), imageToUpload);
-        }
+        imageToUpload = new AlbumPhoto();
+        imageToUpload.setPhotoFilename("IMG_" + new Date() + ".jpg");
+
+        photoFile = AlbumPhoto.getPhotoFile(getActivity(), imageToUpload);
 
         uploadInstructions = (TextView) v.findViewById(R.id.upload_instructions);
 
@@ -198,6 +201,8 @@ public class UploadFragment extends Fragment {
                 Toast.makeText(getActivity(), R.string.upload_success, Toast.LENGTH_LONG).show();
 
                 photoFile.delete();
+
+                photoFile = null;
 
                 uploadButton.setEnabled(false);
                 uploadCustomName.getText().clear();
