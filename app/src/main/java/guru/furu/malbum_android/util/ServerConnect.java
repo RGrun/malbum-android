@@ -548,8 +548,6 @@ public class ServerConnect {
             request.writeBytes(crlf);
             request.writeBytes(twoHyphens + boundary + crlf);
 
-            // this crap gives me a whole new appreciation for Firefox form uploads
-
             request.writeBytes(twoHyphens + boundary + crlf);
             request.writeBytes("Content-Disposition: form-data; name=\"" +
                     attachmentName + "\";filename=\"" +

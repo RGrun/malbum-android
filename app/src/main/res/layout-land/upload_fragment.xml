@@ -18,8 +18,8 @@
             android:layout_gravity="center_horizontal" />
 
         <ImageButton
-            android:layout_width="300dp"
-            android:layout_height="500dp"
+            android:layout_width="500dp"
+            android:layout_height="300dp"
             android:id="@+id/upload_image"
             android:layout_marginLeft="30dp"
             android:layout_marginRight="30dp"
