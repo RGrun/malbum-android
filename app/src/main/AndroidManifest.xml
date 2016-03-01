@@ -24,8 +24,23 @@
         </activity>
 
         <activity android:name=".activities.TabbedGalleryActivity" />
-        <activity android:name=".activities.SingleUserAlbumActivity" />
-        <activity android:name=".activities.PhotoPageActivity" />
+
+        <activity android:name=".activities.SingleUserAlbumActivity"
+            android:parentActivityName=".activities.TabbedGalleryActivity">
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.TabbedGalleryActivity" />
+
+        </activity>
+        <activity android:name=".activities.PhotoPageActivity"
+            android:parentActivityName=".activities.TabbedGalleryActivity">
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.TabbedGalleryActivity" />
+
+        </activity>
 
     </application>
 

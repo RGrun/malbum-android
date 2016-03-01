@@ -1,6 +1,7 @@
 package guru.furu.malbum_android.activities;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -157,7 +158,21 @@ public class TabbedGalleryActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_logout) {
+
+            // remove stored prefs data
+
+            SharedPreferences.Editor editor =
+                    getSharedPreferences(LoginFragment.PREF_FILE_NAME,
+                            Context.MODE_PRIVATE).edit();
+
+            editor.clear();
+
+            editor.commit();
+
+            // return to loginActivity
+            finish();
+
             return true;
         }
 

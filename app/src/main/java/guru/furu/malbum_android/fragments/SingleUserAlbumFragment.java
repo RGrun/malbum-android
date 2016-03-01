@@ -71,8 +71,11 @@ public class SingleUserAlbumFragment extends Fragment {
                 new ThumbnailDownloader.ThumbnailDownloadListener<AlbumPhotoHolder>() {
                     @Override
                     public void onThumbnailDownloaded(AlbumPhotoHolder photoHolder, Bitmap bitmap) {
-                        Drawable drawable = new BitmapDrawable(getResources(), bitmap);
-                        photoHolder.bindDrawable(drawable);
+                        if(isAdded()) {
+                            Drawable drawable = new BitmapDrawable(getResources(), bitmap);
+                            photoHolder.bindDrawable(drawable);
+                        }
+
                     }
                 });
 

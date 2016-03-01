@@ -20,4 +20,5 @@
     <string name="photo_description">Photo Description</string>
     <string name="upload_success">Photo upload was successful!</string>
     <string name="upload_failure">Photo upload failed :(</string>
+    <string name="logout">Logout</string>
 </resources>

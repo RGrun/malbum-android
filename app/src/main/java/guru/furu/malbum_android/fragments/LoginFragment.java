@@ -97,7 +97,7 @@ public class LoginFragment extends Fragment {
         // null result signals connection failure
 
         if(user != null) {
-            //login succeeded
+            // login succeeded
             // modify shared prefs value
             SharedPreferences.Editor editor =
                     getActivity().getSharedPreferences(PREF_FILE_NAME,
