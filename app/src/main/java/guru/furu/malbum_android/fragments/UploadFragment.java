@@ -2,6 +2,7 @@ package guru.furu.malbum_android.fragments;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -20,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Date;
 
 import guru.furu.malbum_android.R;
@@ -51,6 +53,8 @@ public class UploadFragment extends Fragment {
 
     private MalbumUser user;
 
+    private Bitmap curBitmap;
+
     private static final int REQUEST_PHOTO = 0;
 
     private static final String DEBUG = "UploadFragment";
@@ -65,7 +69,10 @@ public class UploadFragment extends Fragment {
 
         setRetainInstance(true);
 
-        user = ((TabbedGalleryActivity)getActivity()).getMalbumUser();
+        imageToUpload = new AlbumPhoto();
+        imageToUpload.setPhotoFilename("IMG_" + new Date() + ".jpg");
+
+        curBitmap = null;
 
     }
 
@@ -73,16 +80,13 @@ public class UploadFragment extends Fragment {
     public void onResume() {
         super.onResume();
         user = ((TabbedGalleryActivity)getActivity()).getMalbumUser();
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v =  inflater.inflate(R.layout.upload_fragment, container, false);
-
-
-        imageToUpload = new AlbumPhoto();
-        imageToUpload.setPhotoFilename("IMG_" + new Date() + ".jpg");
 
         photoFile = AlbumPhoto.getPhotoFile(getActivity(), imageToUpload);
 
@@ -105,6 +109,10 @@ public class UploadFragment extends Fragment {
         uploadImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                // reset photo
+                curBitmap = null;
+
                 // launch camera app
                 startActivityForResult(captureImage, REQUEST_PHOTO);
             }
@@ -130,6 +138,7 @@ public class UploadFragment extends Fragment {
 
         uploadDescription = (EditText) v.findViewById(R.id.upload_comment);
 
+
         return v;
     }
 
@@ -137,8 +146,12 @@ public class UploadFragment extends Fragment {
         if(photoFile == null || !photoFile.exists()) {
             // do something here?
         } else {
-            Bitmap bitmap = PictureUtils.getScaledBitmap(photoFile.getPath(), getActivity());
-            uploadImage.setImageBitmap(bitmap);
+
+            if(curBitmap == null) {
+                curBitmap = PictureUtils.getScaledBitmap(photoFile.getPath(), getActivity());
+            }
+
+            uploadImage.setImageBitmap(curBitmap);
 
             uploadButton.setEnabled(true);
 
@@ -153,6 +166,17 @@ public class UploadFragment extends Fragment {
         }
 
         if(requestCode == REQUEST_PHOTO) {
+
+            // insert photo into phone's main photo content provider
+            /*ContentResolver cr = getActivity().getContentResolver();
+
+            try {
+                MediaStore.Images.Media.insertImage(cr, photoFile.getPath(),
+                        "Malbum Capture", "An image from Malbum");
+            } catch (FileNotFoundException foe) {
+                Log.e(DEBUG, foe.getMessage());
+            }*/
+
             updatePhoto();
         }
     }
@@ -200,9 +224,10 @@ public class UploadFragment extends Fragment {
             if(result) {
                 Toast.makeText(getActivity(), R.string.upload_success, Toast.LENGTH_LONG).show();
 
-                photoFile.delete();
+                //photoFile.delete();
 
                 photoFile = null;
+                curBitmap = null;
 
                 uploadButton.setEnabled(false);
                 uploadCustomName.getText().clear();
