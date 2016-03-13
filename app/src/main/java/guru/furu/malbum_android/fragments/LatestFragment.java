@@ -17,7 +17,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import guru.furu.malbum_android.activities.PhotoPageActivity;
@@ -146,10 +148,15 @@ public class LatestFragment extends Fragment {
         public AlbumPhotoHolder(View itemView) {
             super(itemView);
 
-            photoImage = (ImageView) itemView.findViewById(R.id.latest_image);
-            photoTitle = (TextView) itemView.findViewById(R.id.latest_title);
-            photoUser = (TextView) itemView.findViewById(R.id.latest_uname);
-            photoDate = (TextView) itemView.findViewById(R.id.latest_date);
+//            photoImage = (ImageView) itemView.findViewById(R.id.latest_image);
+//            photoTitle = (TextView) itemView.findViewById(R.id.latest_title);
+//            photoUser = (TextView) itemView.findViewById(R.id.latest_uname);
+//            photoDate = (TextView) itemView.findViewById(R.id.latest_date);
+
+            photoImage = (ImageView) itemView.findViewById(R.id.latest_image_card);
+            //photoTitle = (TextView) itemView.findViewById(R.id.latest_title);
+            photoUser = (TextView) itemView.findViewById(R.id.user_name_card);
+            photoDate = (TextView) itemView.findViewById(R.id.date_card);
 
             itemView.setOnClickListener(this);
         }
@@ -158,9 +165,9 @@ public class LatestFragment extends Fragment {
             photoImage.setImageDrawable(drawable);
         }
 
-        public void setPhotoTitle(String newText) {
+        /*public void setPhotoTitle(String newText) {
             photoTitle.setText(newText);
-        }
+        }*/
 
         public void setPhotoUser(String newText) { photoUser.setText(newText); }
 
@@ -182,7 +189,8 @@ public class LatestFragment extends Fragment {
 
 
             // inflate proper layout and pass to holder's constructor
-            View view = inflater.inflate(R.layout.latest_image, viewGroup, false);
+            //View view = inflater.inflate(R.layout.latest_image, viewGroup, false);
+            View view = inflater.inflate(R.layout.row_places, viewGroup, false);
 
             return new AlbumPhotoHolder(view);
         }
@@ -205,9 +213,10 @@ public class LatestFragment extends Fragment {
                 customName = userPhoto.getName();
             }
 
-            AlbumPhoto.setPhotoTitle(customName);
+            //AlbumPhoto.setPhotoTitle(customName);
 
             AlbumPhoto.setPhotoUser(userPhoto.getUname());
+
             AlbumPhoto.setPhotoDate(userPhoto.getUpload_date());
 
 
@@ -217,7 +226,9 @@ public class LatestFragment extends Fragment {
 
             // make background thread download image thumbnail
             // the reference to the current item is passed on to the downloader
-            thumbnailDownloader.queueThumbnail(AlbumPhoto, userPhoto.getThumbImageURL());
+            //thumbnailDownloader.queueThumbnail(AlbumPhoto, userPhoto.getThumbImageURL());
+            thumbnailDownloader.queueThumbnail(AlbumPhoto, userPhoto.getFullImageURL());
+
 
         }
 

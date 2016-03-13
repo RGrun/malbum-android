@@ -224,7 +224,7 @@ public class UploadFragment extends Fragment {
             if(result) {
                 Toast.makeText(getActivity(), R.string.upload_success, Toast.LENGTH_LONG).show();
 
-                //photoFile.delete();
+                photoFile.delete();
 
                 photoFile = null;
                 curBitmap = null;

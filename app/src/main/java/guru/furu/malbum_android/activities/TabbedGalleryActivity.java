@@ -95,15 +95,15 @@ public class TabbedGalleryActivity extends AppCompatActivity {
                 switch (pos) {
                     case 0:
                         toolbar.setTitle("Latest Images");
-                        setSupportActionBar(toolbar);
+                        //setSupportActionBar(toolbar);
                         break;
                     case 1:
                         toolbar.setTitle("Recent Images By User");
-                        setSupportActionBar(toolbar);
+                        //setSupportActionBar(toolbar);
                         break;
                     case 2:
                         toolbar.setTitle("Upload New Image");
-                        setSupportActionBar(toolbar);
+                        //setSupportActionBar(toolbar);
                         break;
                 }
             }

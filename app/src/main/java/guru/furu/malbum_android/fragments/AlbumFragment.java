@@ -208,7 +208,6 @@ public class AlbumFragment extends Fragment {
         public void onBindViewHolder(AlbumHolder AlbumHolder, int position) {
             UserAlbum UserAlbum = userAlbums.get(position);
 
-            // TODO: get better placeholder image
             Drawable placeholder = getResources().getDrawable(R.drawable.placeholder);
             AlbumHolder.bindUserAlbum(UserAlbum);
 
