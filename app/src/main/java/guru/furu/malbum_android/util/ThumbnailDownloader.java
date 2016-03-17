@@ -73,6 +73,7 @@ public class ThumbnailDownloader<T> extends HandlerThread {
 
     @Override
     protected void onLooperPrepared() {
+        super.onLooperPrepared();
         requestHandler = new Handler() {
 
             @Override
@@ -104,7 +105,7 @@ public class ThumbnailDownloader<T> extends HandlerThread {
 
             } else {
                 // No: download the bitmap and stick it in the cache for later
-                byte[] bitmapBytes = new ServerConnect().getUrlBytes(url);
+                byte[] bitmapBytes = ServerConnect.getUrlBytes(url);
 
                 bitmap = BitmapFactory
                         .decodeByteArray(bitmapBytes, 0, bitmapBytes.length);
@@ -122,6 +123,7 @@ public class ThumbnailDownloader<T> extends HandlerThread {
                 // this code is run in the UI thread
                 @Override
                 public void run() {
+
                     if(requestMap.get(target) != url) {
                         return;
                     }
